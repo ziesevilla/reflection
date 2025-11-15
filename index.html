@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflections (Prototype)</title>
+    <style>
+        /* * --- 1. Core Atmosphere & Typography ---
+         * As requested: Monospaced, distressed font in a dark, oppressive environment.
+         */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #000;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            /* A subtle gradient to simulate static/vignetting */
+            background-image: radial-gradient(circle, #111 0%, #000 70%);
+        }
+
+        /* * --- 2. Game Layout Containers ---
+         * Handles the main game screen and the initial start screen.
+         */
+        #game-container {
+            width: 90%;
+            max-width: 700px;
+            margin: 20px;
+            text-align: left;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            display: none; /* Hidden until game starts */
+        }
+
+        #start-screen {
+            text-align: center;
+        }
+
+        /* * --- 3. UI Element: The Text Box ---
+         * As requested: Centered, dark, semi-transparent, with a thin, flickering white border.
+         */
+        .text-box {
+            background: rgba(10, 10, 10, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+
+            /* The "flickering" border animation from the GDD */
+            animation: flicker 4s infinite linear;
+        }
+
+        @keyframes flicker {
+            0%, 20.1%, 25.1%, 50.3%, 100% {
+                border-color: rgba(255, 255, 255, 0.5);
+                box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+            }
+            20%, 25%, 50% {
+                border-color: rgba(255, 255, 255, 0.1);
+                box-shadow: none;
+            }
+        }
+
+        /* * --- 4. UI Element: Text Display ---
+         * Handles story text, Intercom text, and their animations.
+         */
+        #story-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #ccc;
+            min-height: 100px; /* Prevents layout shift */
+        }
+
+        /* As requested: Intercom/Whisper text is large and pulses */
+        #intercom-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            color: #fff;
+            opacity: 0.8;
+            margin: 15px 0;
+            display: none; /* Hidden by default */
+            animation: pulse 2.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.9;
+                transform: scale(1.02);
+            }
+        }
+
+        /* * --- 5. UI Element: Action Buttons ---
+         * As requested: Not traditional buttons, but text options that glow.
+         */
+        #choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            /* Transition for fading in/out when busy */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .choice {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            transition: background 0.2s ease, text-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* The "faint glow" on hover */
+        .choice:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.7);
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+        }
+
+        /* "Start Game" button styling */
+        #start-button {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            color: #fff;
+            background: #000;
+            border: 1px solid #fff;
+            padding: 15px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        #start-button:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 10px #fff;
+        }
+
+        /* * --- 6. Path-Specific Theming ---
+         * As requested: Text color and UI elements change to reflect the path.
+         */
+        
+        /* The Blood Path: Red, accusatory */
+        .path-blood .text-box {
+            border-color: rgba(200, 0, 0, 0.5);
+            animation: flicker-blood 4s infinite linear;
+        }
+        .path-blood #story-text { color: #f99; }
+        .path-blood .choice:hover {
+            background: rgba(200, 0, 0, 0.2);
+            border-color: rgba(200, 0, 0, 0.7);
+            text-shadow: 0 0 6px rgba(200, 0, 0, 0.5);
+        }
+
+        @keyframes flicker-blood {
+            0%, 20.1%, 25.1%, 50.3%, 100% {
+                border-color: rgba(200, 0, 0, 0.5);
+                box-shadow: 0 0 8px rgba(200, 0, 0, 0.2);
+            }
+            20%, 25%, 50% {
+                border-color: rgba(200, 0, 0, 0.1);
+                box-shadow: none;
+            }
+        }
+
+        /* The Orderly Path: Cyan, clinical, untrustworthy */
+        .path-orderly .text-box {
+            border-color: rgba(0, 200, 200, 0.5);
+            animation: flicker-orderly 4s infinite linear;
+        }
+        .path-orderly #story-text { color: #9ff; }
+        .path-orderly .choice:hover {
+            background: rgba(0, 200, 200, 0.2);
+            border-color: rgba(0, 200, 200, 0.7);
+            text-shadow: 0 0 6px rgba(0, 200, 200, 0.5);
+        }
+
+        @keyframes flicker-orderly {
+            0%, 20.1%, 25.1%, 50.3%, 100% {
+                border-color: rgba(0, 200, 200, 0.5);
+                box-shadow: 0 0 8px rgba(0, 200, 200, 0.2);
+            }
+            20%, 25%, 50% {
+                border-color: rgba(0, 200, 200, 0.1);
+                box-shadow: none;
+            }
+        }
+
+        /* The Silent Path: Grey, internal, fading */
+        .path-silent .text-box {
+            border-color: rgba(150, 150, 150, 0.5);
+            animation: flicker-silent 4s infinite linear;
+        }
+        .path-silent #story-text { color: #bbb; }
+        .path-silent .choice:hover {
+            background: rgba(150, 150, 150, 0.2);
+            border-color: rgba(150, 150, 150, 0.7);
+            text-shadow: 0 0 6px rgba(150, 150, 150, 0.5);
+        }
+
+        @keyframes flicker-silent {
+            0%, 20.1%, 25.1%, 50.3%, 100% {
+                border-color: rgba(150, 150, 150, 0.5);
+                box-shadow: 0 0 8px rgba(150, 150, 150, 0.2);
+            }
+}
+
+/* * --- 7. Settings Menu & Modal --- */
+#settings-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.2s ease;
+}
+#settings-button:hover {
+    color: rgba(255, 255, 255, 1);
+}
+#settings-button svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+}
+
+#settings-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    display: none; /* Re-state for browsers that don't support flex in this state */
+}
+#settings-modal.modal-open {
+    display: flex;
+}
+
+.settings-content {
+    font-family: 'Courier New', Courier, monospace;
+    background: rgba(10, 10, 10, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    color: #eee;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+.settings-content h2 {
+    margin-top: 0;
+    text-align: center;
+    font-weight: normal;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 15px;
+}
+.setting-row {
+    margin-bottom: 20px;
+}
+.setting-row label {
+    display: block;
+    margin-bottom: 10px;
+    color: #ccc;
+}
+
+/* Styling the volume slider */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid #000;
+}
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid #000;
+}
+
+#close-settings {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    color: #000;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #fff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+#close-settings:hover {
+    background: #fff;
+    box-shadow: 0 0 10px #fff;
+}
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Initial Start Screen -->
+    <div id="start-screen">
+        <h1>Reflections</h1>
+        <p>A Prototype</p>
+        <button id="start-button">Awaken</button>
+    </div>
+
+    <!-- Main Game UI (Hidden by default) -->
+    <div id="game-container">
+        <!-- Settings Button -->
+        <div id="settings-button">
+            <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.48,0.41L9.18,5.13C8.6,5.37,8.07,5.68,7.57,6.06L5.18,5.1C4.96,5.02,4.71,5.09,4.59,5.31L2.67,8.63 C2.56,8.83,2.61,9.1,2.79,9.24l2.03,1.58C4.8,11.36,4.78,11.68,4.78,12c0,0.32,0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.42,2.32 c0.04,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.48-0.41l0.42-2.32c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0.01,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+        </div>
+
+        <!-- Intercom Text (Top) -->
+        <div id="intercom-text"></div>
+        
+        <!-- Main Text Box (Center) -->
+        <div class="text-box">
+            <p id="story-text"></p>
+        </div>
+        
+        <!-- Choices (Bottom) -->
+        <div id="choices-container"></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal">
+        <div class="settings-content">
+            <h2>Settings</h2>
+            
+            <div class="setting-row">
+                <label for="volume-slider">Volume</label>
+                <input type="range" id="volume-slider" min="0" max="100" value="100">
+            </div>
+
+            <button id="close-settings">Close</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- 1. DOM Element References ---
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const gameContainer = document.getElementById('game-container');
+        const storyTextElement = document.getElementById('story-text');
+        const intercomTextElement = document.getElementById('intercom-text');
+        const choicesContainer = document.getElementById('choices-container');
+        const settingsButton = document.getElementById('settings-button');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettingsButton = document.getElementById('close-settings');
+        const volumeSlider = document.getElementById('volume-slider');
+        
+        // --- 2. Game State Variables ---
+        let audioContext;
+        let currentPath = ''; // Stores the current path theme ('path-blood', 'path-orderly', 'path-silent')
+        const apiKey = ""; // API Key for Gemini
+        let isBusy = false; // Prevents scene changes while audio is playing
+        let currentAudio = null; // Holds the currently playing Audio object
+        let globalVolume = 1.0; // Master volume control (0.0 to 1.0)
+
+        // --- 3. Game Story Data ---
+        // This object IS the game. It directly translates your GDD into a navigable structure.
+        const story = {
+            'start': {
+                text: "You awaken strapped to a hospital bed. The air is thick with the smell of ozone and rust. Alarms wail in the distance, and the lights flicker erratically. You are disoriented, paranoid.",
+                intercomText: "...help is available, if you let us...",
+                choices: [
+                    { text: "A: Call for help. Someone must know you're here.", target: 'orderly-1' },
+                    { text: "B: Break free. The restraints are old and cracking.", target: 'blood-1' },
+                    { text: "C: Stay still. Listen. Observe.", target: 'silent-1' }
+                ]
+            },
+
+            // --- Tier 1: Path Definitions ---
+
+            'orderly-1': {
+                pathTheme: 'path-orderly',
+                text: "You shout, and a figure in a stained Nurse's uniform appears. 'Oh, you're awake,' she says, her voice flat. 'Don't trust the reflections here. They show... lies.' She points a long, pale finger down a dark hallway.",
+                intercomText: "...such a trusting soul...",
+                choices: [
+                    { text: "D: Trust her. Go down the hallway she indicated.", target: 'convergence' }, // Survival
+                    { text: "F: Ignore her. Look into the polished metal of the door.", target: 'dead-end-mirror' } // Dead End
+                ]
+            },
+            'blood-1': {
+                pathTheme: 'path-blood',
+                text: "You wrench your arm free. Skin tears. Blood wells and drips to the floor, forming a small, accusing pool. As you watch, the drops seem to move, to crawl, forming a single, wet word on the tile: 'GUILTY'.",
+                intercomText: "...you can't wipe it anymore...",
+                choices: [
+                    { text: "E: Accept it. You are guilty. Step over the word and move on.", target: 'convergence' }, // Survival
+                    { text: "H: Deny it. Try to find the source of the blood.", target: 'dead-end-corpse' } // Dead End
+                ]
+            },
+            'silent-1': {
+                pathTheme: 'path-silent',
+                text: "You stay quiet, listening. The intercom static crackles, and a new voice screams through—your own. 'YOU ALREADY KILLED ME ONCE!' it shrieks, a sound of pure agony. The speaker grille on the wall rattles.",
+                intercomText: "YOU ALREADY KILLED ME ONCE!",
+                choices: [
+                    { text: "G: Face the voice. Go to the speaker grille on the wall.", target: 'convergence' }, // Survival
+                    { text: "L: It's a trick. Look for the source in the mirrors.", target: 'dead-end-mirror' } // Dead End
+                ]
+            },
+
+            // --- Tier 2: Dead Ends ---
+
+            'dead-end-mirror': {
+                pathTheme: 'path-silent',
+                text: "You stare into the reflective surface. Your own eyes stare back, wide with terror. But behind you, in the reflection, a figure stands—a twisted, broken memory of your crime. It reaches out, and its cold hands pull you *through* the glass. You are consumed.",
+                intercomText: "GAME OVER",
+                choices: [
+                    { text: "M: ...You are back in the bed. The cycle resets...", target: 'start' }
+                ]
+            },
+            'dead-end-corpse': {
+                pathTheme: 'path-blood',
+                text: "You follow the trail of your own blood to a sealed cell. Peering through the slot, you see... yourself. Lifeless. Strapped to a bed. As you watch, its eyes snap open. It grins, a perfect, horrifying mirror of your own face. The paranoia is too much. You collapse.",
+                intercomText: "GAME OVER",
+                choices: [
+                    { text: "M: ...You are back in the bed. The cycle resets...", target: 'start' }
+                ]
+            },
+
+            // --- Tier 3: Climax (Convergence) ---
+
+            'convergence': {
+                text: "You've bypassed the traps. You stand in a circular room, walls lined with mirrors. The Nurse, the blood, the voice—they are all gone. There is only you, and the true, unblemished reflection in front of you. It doesn't move. It just watches. This is it. The decision that defines you.",
+                intercomText: "...who are you...",
+                choices: [
+                    { text: "DESTROY. (Smash the mirror, reject the trauma)", target: 'ending-good' },
+                    { text: "MERGE. (Press your hand to the glass, accept the self)", target: 'ending-neutral' },
+                    { text: "DENY. (Turn your back and walk away)", target: 'ending-bad' }
+                ]
+            },
+
+            // --- Endings ---
+
+            'ending-good': {
+                pathTheme: 'path-orderly',
+                text: "Your fist shatters the glass. The room implodes in a cascade of light. The alarms stop. The air is clean. You are free. You have broken the cycle by forgiving yourself.",
+                intercomText: "YOU ARE... DEFINED.",
+                choices: [
+                    { text: "Play Again?", target: 'start' }
+                ]
+            },
+            'ending-neutral': {
+                pathTheme: 'path-silent',
+                text: "You press your hand to the glass. It ripples, and your reflection's hand meets yours. A strange peace settles over you. You are not just the victim. You are not just the perpetrator. You are both sides of the glass.",
+                intercomText: "YOU ARE... COMPLETE.",
+                choices: [
+                    { text: "Play Again?", target: 'start' }
+                ]
+            },
+            'ending-bad': {
+                pathTheme: 'path-blood',
+                text: "You turn your back on the truth. It's easier that way. As you walk away, the room fades... but it doesn't disappear. You find yourself back in the hospital bed. The alarms begin to wail. You never left.",
+                intercomText: "YOU ARE... TRAPPED.",
+                choices: [
+                    { text: "Play Again?", target: 'start' }
+                ]
+            }
+        };
+
+        // --- 4. Game Engine Logic ---
+
+        /**
+         * Initializes the game, hiding the start screen and showing the game UI.
+         */
+        function startGame() {
+            // Initialize AudioContext on user gesture (avoids browser policy issues)
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            startScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
+            setTimeout(() => {
+                gameContainer.style.opacity = 1;
+            }, 50); // Small delay for fade-in
+            
+            showScene('start');
+        }
+
+        /**
+         * Renders a new scene based on the provided scene ID.
+         * This is now an async function to handle audio loading.
+         * @param {string} sceneId - The key from the 'story' object.
+         */
+        async function showScene(sceneId) {
+            if (isBusy) return; // Don't transition if already busy
+            isBusy = true;
+
+            const scene = story[sceneId];
+            if (!scene) {
+                console.error(`Scene not found: ${sceneId}`);
+                isBusy = false;
+                return;
+            }
+
+            // --- 4.1. Stop previous audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            // --- 4.2. Update Text and Atmosphere
+            currentPath = scene.pathTheme || '';
+            gameContainer.className = currentPath;
+            storyTextElement.textContent = scene.text;
+
+            if (scene.intercomText) {
+                intercomTextElement.textContent = `"${scene.intercomText}"`;
+                intercomTextElement.style.display = 'block';
+            } else {
+                intercomTextElement.style.display = 'none';
+            }
+
+            // --- 4.3. Clear, Build, and Disable Choices
+            choicesContainer.innerHTML = ''; // Clear old choices
+            choicesContainer.style.opacity = 0.5;
+            choicesContainer.style.pointerEvents = 'none';
+
+            scene.choices.forEach(choice => {
+                const choiceElement = document.createElement('button');
+                choiceElement.classList.add('choice');
+                choiceElement.textContent = choice.text;
+                choiceElement.onclick = () => {
+                    // 'isBusy' check is handled by pointerEvents
+                    playClickSound();
+                    showScene(choice.target);
+                };
+                choicesContainer.appendChild(choiceElement);
+            });
+
+            // --- 4.4. Fetch and Play Audio
+            try {
+                const audioUrl = await fetchSceneAudio(scene);
+                if (audioUrl) {
+                    currentAudio = new Audio(audioUrl);
+                    currentAudio.volume = globalVolume; // Apply global volume
+                    currentAudio.play();
+                    currentAudio.onended = () => {
+                        isBusy = false;
+                        currentAudio = null;
+                        choicesContainer.style.opacity = 1;
+                        choicesContainer.style.pointerEvents = 'auto';
+                    };
+                } else {
+                    // No audio to play
+                    isBusy = false;
+                    choicesContainer.style.opacity = 1;
+                    choicesContainer.style.pointerEvents = 'auto';
+                }
+            } catch (error) {
+                console.error("Error playing audio:", error);
+                isBusy = false; // Enable choices even on error
+                choicesContainer.style.opacity = 1;
+                choicesContainer.style.pointerEvents = 'auto';
+            }
+        }
+
+        /**
+         * Plays the "sharp cracking sound" on choice selection, as per the GDD.
+         * This generates the sound using the Web Audio API, requiring no audio files.
+         */
+        function playClickSound() {
+            if (!audioContext) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            const now = audioContext.currentTime;
+
+            // Oscillator (the sound's tone)
+            oscillator.type = 'triangle'; // A sharp, clean tone
+            oscillator.frequency.setValueAtTime(1200, now); // High pitch
+            oscillator.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+
+            // Gain (the sound's volume/envelope) - NOW RESPECTS GLOBAL VOLUME
+            gainNode.gain.setValueAtTime(0.5 * globalVolume, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1); // Very fast decay
+
+            // Connect and play
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start(now);
+            oscillator.stop(now + 0.1);
+        }
+
+        // --- 5. Event Listeners ---
+        startButton.addEventListener('click', startGame);
+
+        settingsButton.addEventListener('click', () => {
+            settingsModal.style.display = 'flex'; // Use flex to center
+        });
+
+        closeSettingsButton.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            globalVolume = e.target.value / 100;
+            if (currentAudio) {
+                currentAudio.volume = globalVolume; // Adjust playing audio in real-time
+            }
+        });
+
+
+        // --- 6. TTS Audio Functions ---
+
+        /**
+         * Fetches TTS audio for a given scene.
+         * @param {object} scene - The story scene object.
+         * @returns {Promise<string|null>} A Promise that resolves with a playable audio URL or null.
+         */
+        async function fetchSceneAudio(scene) {
+            // Construct the script for multi-speaker TTS with "gloomy" prompts
+            let script = `${scene.text}`;
+            
+            if (scene.intercomText) {
+                // Add specific tone guidance based on GDD
+                let intercomPrompt = scene.intercomText;
+                if (intercomPrompt.includes("KILLED ME ONCE")) {
+                    script += `\nIntercom: Say with a desperate, gravelly shriek: ${intercomPrompt}`;
+                } else if (intercomPrompt.includes("GAME OVER")) {
+                    script += `\nIntercom: Say with a flat, final, distorted, and gravelly voice: ${intercomPrompt}`;
+                } else {
+                    // Default gloomy/menacing prompt
+                    script += `\nIntercom: Say in a distorted, gravelly, and menacing tone: ${intercomPrompt}`;
+                }
+            }
+
+            // Don't fetch if no real text
+            if (script.trim() === "Narrator:") return null;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: `TTS the following, with specific voices and tones:\n${script}` }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        multiSpeakerVoiceConfig: {
+                            speakerVoiceConfigs: [
+                                // Enceladus is "Breathy" - for the gloomy narrator
+                                { speaker: "Narrator", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Enceladus" } } }, 
+                                // Algenib is "Gravelly" - for the menacing intercom
+                                { speaker: "Intercom", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Algenib" } } } 
+                            ]
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            // Retry logic for API calls
+            let response;
+            for (let i = 0; i < 3; i++) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) break; // Success
+                } catch (error) {
+                    // Network error, will retry
+                    if (i === 2) throw error; // Rethrow on last attempt
+                }
+                // Wait before retrying
+                await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+            }
+
+            if (!response || !response.ok) {
+                console.error(`API request failed after retries.`);
+                return null;
+            }
+
+            const result = await response.json();
+            const part = result?.candidates?.[0]?.content?.parts?.[0];
+            const audioData = part?.inlineData?.data;
+            const mimeType = part?.inlineData?.mimeType;
+
+            if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                const pcmData = base64ToArrayBuffer(audioData);
+                const pcm16 = new Int16Array(pcmData);
+                // API returns L16, rate=24000
+                const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                
+                const wavBlob = pcmToWav(pcm16, sampleRate);
+                return URL.createObjectURL(wavBlob);
+            } else {
+                console.warn("No audio data received from API response:", result);
+                return null;
+            }
+        }
+
+        /**
+         * Decodes Base64 string to ArrayBuffer.
+         */
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        /**
+         * Converts raw PCM data to a WAV file (Blob).
+         * @param {Int16Array} pcmData - The raw PCM audio data.
+         * @param {number} sampleRate - The sample rate (e.g., 24000).
+         * @returns {Blob} A Blob object representing the WAV file.
+         */
+        function pcmToWav(pcmData, sampleRate) {
+            const numChannels = 1;
+            const bitsPerSample = 16;
+            const dataSize = pcmData.length * (bitsPerSample / 8);
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            // RIFF header
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(view, 8, 'WAVE');
+
+            // fmt chunk
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true); // chunk size
+            view.setUint16(20, 1, true); // audio format (1 = PCM)
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true); // byte rate
+            view.setUint16(32, numChannels * (bitsPerSample / 8), true); // block align
+            view.setUint16(34, bitsPerSample, true);
+
+            // data chunk
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            // Write PCM data
+            let offset = 44;
+            for (let i = 0; i < pcmData.length; i++, offset += 2) {
+                view.setInt16(offset, pcmData[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        /**
+         * Helper to write string to DataView.
+         */
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+    </script>
+</body>
+</html>
