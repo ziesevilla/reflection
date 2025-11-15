@@ -1,0 +1,89 @@
+Game Documentation: Reflections
+Submission for the PIMA Interactive Game Development Challenge: "Decisions That Define Us"
+1. Game Title and Concept Summary
+
+
+Field
+Detail
+Game Title
+Reflections
+Genre
+Interactive Psychological Narrative / Mystery
+Concept
+A short, high-stakes narrative experience where the protagonist, imprisoned in a decaying hospital, must confront a defining past crime and the fragmented aspects of their own self-identity. The core mechanic is a rapid series of decisions that either lead to immediate psychological traps (Dead Ends) or a final, ultimate choice that determines the protagonist's emotional salvation or eternal imprisonment.
+PIMA Theme Focus
+Decisions That Define Us: The entire game funnels all player actions into a single, existential choice at the climax, proving that a multitude of smaller choices lead to, but do not replace, the one decision that truly defines their character: acceptance, denial, or destruction of the self.
+
+2. Storyline Overview
+The protagonist awakens strapped to a hospital bed, disoriented by alarms and flickering lights. An unsettling intercom message suggests help is available "if you let us." This immediately establishes a high level of paranoia. The narrative branches into three thematic lanes based on the first action:
+The Orderly Path (A: Call for Help): Focuses on Trust and External Warning. The player encounters a Nurse figure who warns them against "reflections." This path tests the player's judgment of external assistance and leads to the revelation of an unlocked door, a forced retreat, or a shattering confrontation.
+The Blood Path (B: Break Free): Focuses on Guilt and Consequence. The act of breaking free is physically costly, manifested by a trail of blood forming a symbolic, accusatory message ("You can't wipe it anymore."). This path is a direct confrontation with the evidence of the protagonist's "crime" and their attempts to erase or accept it.
+The Silent Path (C: Stay Still): Focuses on Internal Accusation. The player is confronted by a distorted voice from the speaker—the protagonist's own voice—shouting, "You already killed me once!". This path is driven by internalized paranoia and leads to exploring the walls, mirrors, and shadows for the source of their self-condemnation.
+Dead Ends (Traps)
+Certain mid-game choices lead to "Game Over" states, where the protagonist is consumed by the trauma:
+The Mirror Implosion (F, I, L): The character is pulled into mirrors that show "twisted memories of your crime."
+The Corpse Revelation (H, J): The character finds a sealed cell containing their own lifeless body, which then "wakes up" and mirrors the protagonist's face.
+Final Convergence (D, E, K, G)
+All paths that successfully navigate the psychological traps converge on a singular moment: facing the "true reflection" after defeating or evading the Nurse figure. This moment presents the ultimate existential decision that defines the player's journey.
+3. Description of Decision Points
+The game utilizes a three-tier decision structure to layer the emotional impact.
+Tier
+Decision Context
+Thematic Question
+Possible Outcomes
+Tier 1 (Initial)
+The Escape/Reaction: Reaction to waking up imprisoned.
+How do you respond to trauma: seek external aid, fight/damage, or retreat/observe?
+Defines the entire path (Orderly, Blood, Silent).
+Tier 2 (Mid-Game)
+The Confrontation: Reaction to the symbolic event on the path.
+Do you trust the warning, acknowledge the guilt, or silence the accusation?
+Leads to a Dead End (Immediate Failure) or Survival (Advancing to Climax).
+Tier 3 (Climax)
+The Resolution: Facing the complete, true reflection of self.
+Do you accept, destroy, or deny your true self/past?
+Good Ending (Destroy), Neutral Ending (Merge), or Bad Ending (Deny).
+
+4. Flow Theory Application
+The prototype is designed to place the player squarely within a Flow State—a feeling of complete absorption in the activity.
+Flow Component
+Application in Reflections: The Cycle
+Clear Goals & Feedback
+Goals: Immediate goal is always to proceed. Feedback is immediate and harsh: every path gives instant environmental changes (blood symbols, shattering glass, sound static).
+High Concentration
+The oppressive atmosphere (lights, alarms, whispers) demands focus. The limited text and immediate choices prevent distraction and maintain narrative intensity.
+Balance of Challenge & Skill
+Challenge (High): The emotional and moral challenge is significant—the player must process themes of guilt, distrust, and self-acceptance. Skill (Low): The required skill is minimal (reading and choosing one of three options). This imbalance is intentional: by removing mechanical skill barriers, we force the player's cognitive energy entirely onto the moral weight of the choice, maximizing emotional impact.
+Sense of Control
+The player feels complete control over the protagonist's emotional destiny, as every path is a direct result of their judgment call.
+
+5. UI Design Explanation
+The UI is minimalist, atmospheric, and non-distracting, prioritizing the story text and maintaining the theme of decay and surveillance .
+Element
+Design Annotation
+Purpose
+Screen Layout
+(1) Background: Faded, distorted static image of a hospital room or mirrored surface. (2) Text Box: Centered, dark, semi-transparent box with a thin, flickering white border.
+Establishes a paranoid and broken environment.
+Decision Text
+Font: Monospaced, slightly distressed font (e.g., Courier New, slightly blurred). Color: Faint cyan or deep red, depending on the current path's theme (e.g., Path B text is red).
+Enhances the sense of urgency and distress. The thematic coloring provides immediate, non-verbal feedback about the path's psychological cost.
+Action Buttons
+Appearance: No traditional buttons. Choices A, B, C are presented as white text options that glow faintly when hovered. Selection triggers a subtle, sharp cracking sound effect.
+Reduces mechanical friction and immerses the player entirely in the text and soundscape.
+Intercom/Whisper Text
+Presented in large, centered, fluctuating quotation marks ("...") that pulse slightly.
+Distinguishes external, manipulative voices from internal, descriptive text.
+
+6. Reflection Essay: The Single Decision that Defines Us
+The core philosophy of DreamForge Interactive—that games should provoke thought and reflection—is perfectly encapsulated by the PIMA theme, "Decisions That Define Us." Our prototype, Reflections: The Cycle, is a deliberate distillation of this philosophy, designed to prove that the most complex emotional journey can be condensed into a series of sharp, high-stakes moral choices that lead to a single, defining existential moment.
+We intentionally structured the narrative as a compressed decision tree. Unlike games that rely on branching complexity for replayability, Reflections focuses on concentrating emotional depth. The initial choice—between crying for help, fighting with harm, or shutting down—is not merely a narrative fork; it’s a prompt to the player to immediately define the protagonist’s coping mechanism in the face of immense psychological trauma. Do they seek external validation (Orderly Path), confront the evidence of their guilt (Blood Path), or internalize the attack (Silent Path)? This first decision is not defining in itself, but it sets the stage for what will be defined.
+The mid-game is structured as a series of immediate consequences, or psychological traps. The Dead Ends (F, I, J, H, L) are critical design tools. They are not arbitrary failures but visceral consequences of denial, recklessness, and self-destruction. When the player is pulled into a mirror showing "twisted memories of your crime" or finds their own waking corpse, it forces an immediate, painful moment of self-realization—the price of choosing the wrong way to cope. By immediately resetting the player to the beginning (M), we reinforce the concept of being trapped in a self-inflicted cycle of guilt and trauma.
+The true genius of the design lies in the final convergence. All successful (non-fatal) paths eventually lead to the same crucible: standing before the "true reflection" and making one final decision: Destroy, Merge, or Deny. This is the moment where every previous choice—whether to trust the nurse, wipe the blood, or smash the speaker—culminates. The protagonist has survived the external threats and confronted the internal accusations; now, they must decide their fate concerning the self they have been running from.
+Destroying the mirrors means rejecting the past trauma and achieving a radical state of self-forgiveness ("You have broken the cycle.").
+Merging with the reflection signifies acceptance of all aspects of the self, good and bad ("You are both sides of the glass.").
+Walking away is the ultimate act of denial, trapping the player forever in the fragmented loop ("You never left.").
+By placing the player in a Flow State—where the challenge is emotional judgment rather than mechanical skill—we ensure that this final choice is pure, unadulterated reflection. Reflections: The Cycle is not about what the character does, but about who the player chooses for the character to be in the face of their own defining trauma. It demonstrates that the path to self-definition is complex, but the definition itself is often found in a single, unwavering choice.
+
+
+
